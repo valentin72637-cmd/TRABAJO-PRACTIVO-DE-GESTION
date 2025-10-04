@@ -1,0 +1,4 @@
+/* Estilos mínimos sobre Bootstrap */
+body { background: #f5f7fb; }
+.card { border-radius: 1rem; }
+.btn { border-radius: .75rem; }

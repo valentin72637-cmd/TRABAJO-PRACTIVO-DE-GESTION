@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <header class="main-header">
   <nav class="navbar">
     <div class="logo">
-      <a href="/index.html">Mi Proyecto</a>
+      <a href="/index.html">aaaaaaaa</a>
     </div>
 
     <ul class="nav-links">

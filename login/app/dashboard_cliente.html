@@ -1,0 +1,127 @@
+<!-- login/app/dashboard_cliente.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel Cliente - Gestión de Seguros</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../../backend/Header/header.css" />
+</head>
+
+<body class="bg-light">
+
+  <!-- ======= HEADER ======= -->
+  <header class="main-header">
+    <nav class="navbar container d-flex justify-content-between align-items-center py-3">
+      <a class="navbar-brand" href="../index.html">Mi Proyecto</a>
+      <ul class="nav list-unstyled d-flex gap-3 m-0">
+        <li><a id="linkInicio" href="#">Inicio</a></li>
+        <li><a href="./logout.html" class="text-danger">Cerrar sesión</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ======= CONTENIDO PRINCIPAL ======= -->
+  <main class="container py-4">
+    <!-- Mensaje de bienvenida -->
+    <div class="alert alert-success">
+      Accediste como <strong>cliente</strong>. Bienvenido, <span id="nombreCliente"></span>.
+    </div>
+
+    <!-- Tarjeta con tabla de pólizas -->
+    <div class="card">
+      <div class="card-body">
+        <h1 class="h4">Mis Pólizas</h1>
+        <p class="text-muted">Estas son las pólizas asignadas a tu cuenta.</p>
+
+        <!-- Tabla de pólizas del cliente -->
+        <table class="table table-striped mt-3" id="tablaPolizasCliente">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>N° Póliza</th>
+              <th>Tipo</th>
+              <th>Vencimiento</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <!-- Mensaje dinámico opcional -->
+        <p id="mensajePoliza" class="mt-3 fw-semibold text-primary"></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======= SCRIPT PRINCIPAL ======= -->
+  <script>
+    // ============================
+    // 1️⃣ Verifica sesión activa
+    // ============================
+    const user = JSON.parse(localStorage.getItem('usuario_actual') || 'null');
+    const tbody = document.querySelector('#tablaPolizasCliente tbody');
+    const mensaje = document.getElementById('mensajePoliza');
+
+    // Si no hay usuario logueado → redirigir al login
+    if (!user) {
+      window.location.href = '../index.html?error=session';
+    } else {
+      document.getElementById('nombreCliente').textContent = user.nombre || '';
+    }
+
+    // ============================
+    // 2️⃣ Función para renderizar pólizas
+    // ============================
+    function renderPolizasCliente() {
+      const polizas = JSON.parse(localStorage.getItem('polizas') || '[]');
+      // Filtra las pólizas por nombre o email del cliente logueado
+      const mias = polizas.filter(p =>
+        (p.cliente || '').toLowerCase() === (user.nombre || '').toLowerCase() ||
+        (p.cliente || '').toLowerCase() === (user.email || '').toLowerCase()
+      );
+
+      // Limpia la tabla
+      tbody.innerHTML = '';
+
+      if (!mias.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No tenés pólizas registradas.</td></tr>`;
+        mensaje.textContent = ''; // Limpia mensaje dinámico
+      } else {
+        // Crea una fila por cada póliza
+        mias.forEach((p, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${p.numero}</td>
+            <td>${p.tipo}</td>
+            <td>${p.vencimiento}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Muestra mensaje dinámico (solo si tiene una póliza principal)
+        const ultima = mias[mias.length - 1];
+        mensaje.textContent = `Tu póliza actual es de tipo "${ultima.tipo}" y vence el ${ultima.vencimiento}.`;
+      }
+    }
+
+    // ============================
+    // 3️⃣ Sincroniza cambios en tiempo real
+    // ============================
+    // Escucha cambios en localStorage (por ejemplo, si el admin edita pólizas)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'polizas') {
+        renderPolizasCliente(); // Vuelve a renderizar cuando cambian las pólizas
+      }
+    });
+
+    // ============================
+    // 4️⃣ Inicializa al cargar
+    // ============================
+    renderPolizasCliente();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

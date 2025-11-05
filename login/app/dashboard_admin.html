@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel Admin - Gestión de Seguros</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../../backend/Header/header.css" />
+
+  <!-- Estilo para la notificación flotante -->
+  <style>
+    #alertContainer {
+      position: fixed;
+      top: 20px;
+      left: 50%;  /* centrado horizontal */
+      z-index: 1055;
+      transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px);
+    }
+    #alertContainer.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* estilo visual cuando el selector está deshabilitado */
+    .is-disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <!-- ========== HEADER ========== -->
+  <header class="main-header">
+    <nav class="navbar container d-flex justify-content-between align-items-center py-3">
+      <a class="navbar-brand" href="../index.html">Mi Proyecto</a>
+      <ul class="nav list-unstyled d-flex gap-3 m-0">
+        <li><a href="./dashboard_admin.html">Inicio</a></li>
+        <li><a href="./clientes_admin.html">Clientes</a></li>
+        <li><a href="./logout.html" class="text-danger">Cerrar sesión</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ========== CONTENIDO PRINCIPAL ========== -->
+  <main class="container py-4">
+    <div id="alertaBienvenida" class="alert alert-primary mb-4">
+      Accediste como <strong>admin</strong>. Bienvenido, <span id="username"></span>.
+    </div>
+
+    <!-- Contenedor para notificación flotante -->
+    <div id="alertContainer"></div>
+
+    <!-- Pestañas -->
+    <ul class="nav nav-tabs">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#polizas">Pólizas</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#usuarios">Usuarios</a></li>
+    </ul>
+
+    <div class="tab-content mt-3">
+      <!-- TAB DE PÓLIZAS -->
+      <div class="tab-pane fade show active" id="polizas">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4>Gestión de Pólizas</h4>
+        </div>
+
+        <input type="text" id="buscarPoliza" class="form-control mb-2" placeholder="Buscar por cliente o tipo...">
+
+        <table class="table table-striped" id="tablaPolizas">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>N° Póliza</th>
+              <th>Cliente</th>
+              <th>Tipo</th>
+              <th>Vencimiento</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- TAB DE USUARIOS -->
+      <div class="tab-pane fade" id="usuarios">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4>Gestión de Usuarios</h4>
+          <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirNuevoUsuario()">+ Nuevo Usuario</button>
+        </div>
+
+        <input type="text" id="buscarUsuario" class="form-control mb-2" placeholder="Buscar por nombre, email o rol...">
+
+        <table class="table table-striped" id="tablaUsuarios">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== MODAL PÓLIZA ========== -->
+  <div class="modal fade" id="modalPoliza" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tituloPoliza">Editar Póliza</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formPoliza">
+            <input type="hidden" id="polizaIndex">
+            <div class="mb-2"><label>N° de póliza</label><input type="text" id="numero" class="form-control" required></div>
+            <div class="mb-2"><label>Cliente</label><input type="text" id="cliente" class="form-control" required></div>
+            <div class="mb-2"><label>Tipo</label><input type="text" id="tipo" class="form-control" required></div>
+            <div class="mb-2"><label>Vencimiento</label><input type="date" id="vencimiento" class="form-control" required></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" id="guardarPoliza">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL USUARIO ========== -->
+  <div class="modal fade" id="modalUsuario" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tituloUsuario">Nuevo Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formUsuario">
+            <input type="hidden" id="userIndex">
+            <div class="mb-2"><label>Nombre</label><input type="text" id="uname" class="form-control" required></div>
+            <div class="mb-2"><label>Email</label><input type="email" id="uemail" class="form-control" required></div>
+            <div class="mb-2"><label>Rol</label>
+              <select id="urol" class="form-select" required>
+                <option value="admin">admin</option>
+                <option value="cliente">cliente</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label>Tipo de póliza (solo clientes)</label>
+              <select id="utipopoliza" class="form-select">
+                <option value="Auto">Auto</option>
+                <option value="Hogar">Hogar</option>
+                <option value="Vida">Vida</option>
+                <option value="Salud">Salud</option>
+              </select>
+              <small id="helpTipo" class="text-muted"></small>
+            </div>
+            <div class="mb-2">
+              <label>Contraseña</label>
+              <input type="text" id="upass" class="form-control" placeholder="Ej: Cliente123!" required minlength="8">
+              <small class="text-muted">Debe tener al menos 8 caracteres.</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-success" id="guardarUsuario">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCRIPT PRINCIPAL ========== -->
+  <script>
+    // ==== Notificación moderna con efecto fade ====
+    function showAlert(mensaje, tipo = 'success') {
+      const contenedor = document.getElementById('alertContainer');
+      contenedor.innerHTML = `
+        <div class="alert alert-${tipo} shadow-lg rounded-pill py-2 px-3 fade show" role="alert">
+          ${mensaje}
+        </div>`;
+      contenedor.classList.add('show');
+      setTimeout(() => {
+        contenedor.classList.remove('show');
+        setTimeout(() => contenedor.innerHTML = '', 600);
+      }, 3000);
+    }
+
+    // === Sesión admin ===
+    const usuario = JSON.parse(localStorage.getItem('usuario_actual') || '{}');
+    if (usuario?.nombre) document.getElementById('username').textContent = usuario.nombre;
+
+    let polizas = JSON.parse(localStorage.getItem('polizas')) || [];
+    let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    const $ = (sel) => document.querySelector(sel);
+
+    const savePolizas = () => localStorage.setItem('polizas', JSON.stringify(polizas));
+    const saveUsuarios = () => localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    const generarNumero = () => String((Math.max(0, ...polizas.map(p => parseInt(p.numero) || 1000))) + 1);
+
+    // ======= PÓLIZAS =======
+    function renderPolizas(filtro = '') {
+      const tbody = $('#tablaPolizas tbody');
+      const list = polizas.filter(p =>
+        p.cliente.toLowerCase().includes(filtro) || p.tipo.toLowerCase().includes(filtro)
+      );
+      tbody.innerHTML = list.length
+        ? list.map((p, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${p.numero}</td>
+            <td>${p.cliente}</td>
+            <td>${p.tipo}</td>
+            <td>${p.vencimiento}</td>
+            <td>
+              <button class="btn btn-sm btn-warning" onclick="editarPoliza('${p.numero}')">Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="eliminarPoliza('${p.numero}')">Borrar</button>
+            </td>
+          </tr>`).join('')
+        : `<tr><td colspan="6" class="text-center text-muted">No hay pólizas registradas.</td></tr>`;
+      savePolizas();
+    }
+
+    window.editarPoliza = (num) => {
+      const p = polizas.find(x => x.numero === num);
+      if (!p) return;
+      $('#tituloPoliza').textContent = 'Editar Póliza';
+      $('#polizaIndex').value = num;
+      $('#numero').value = p.numero;
+      $('#cliente').value = p.cliente;
+      $('#tipo').value = p.tipo;
+      $('#vencimiento').value = p.vencimiento;
+      new bootstrap.Modal('#modalPoliza').show();
+    };
+
+    window.eliminarPoliza = (num) => {
+      if (!confirm('¿Eliminar póliza?')) return;
+      polizas = polizas.filter(p => p.numero !== num);
+      renderPolizas($('#buscarPoliza').value.toLowerCase());
+      showAlert("❌ Póliza eliminada correctamente", "danger");
+    };
+
+    $('#guardarPoliza').addEventListener('click', () => {
+      const data = {
+        numero: $('#numero').value.trim(),
+        cliente: $('#cliente').value.trim(),
+        tipo: $('#tipo').value.trim(),
+        vencimiento: $('#vencimiento').value
+      };
+      if (!data.numero || !data.cliente || !data.tipo || !data.vencimiento) return;
+      const edit = $('#polizaIndex').value;
+      if (edit) {
+        const i = polizas.findIndex(p => p.numero === edit);
+        if (i >= 0) polizas[i] = data;
+        showAlert("✅ Póliza actualizada correctamente");
+      }
+      renderPolizas($('#buscarPoliza').value.toLowerCase());
+      document.querySelector('#modalPoliza .btn-close').click();
+    });
+
+    // ======= USUARIOS =======
+    function renderUsuarios(filtro = '') {
+      const tbody = $('#tablaUsuarios tbody');
+      const list = usuarios.filter(u =>
+        u.nombre.toLowerCase().includes(filtro) ||
+        u.email.toLowerCase().includes(filtro) ||
+        u.rol.toLowerCase().includes(filtro)
+      );
+      tbody.innerHTML = list.length
+        ? list.map((u, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${u.nombre}</td>
+            <td>${u.email}</td>
+            <td>${u.rol}</td>
+            <td>
+              <button class="btn btn-sm btn-warning" onclick="editarUsuario(${i})">Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="eliminarUsuario(${i})">Borrar</button>
+            </td>
+          </tr>`).join('')
+        : `<tr><td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td></tr>`;
+      saveUsuarios();
+    }
+
+    // === Nueva función: habilitar/deshabilitar el tipo de póliza según rol ===
+    function toggleTipoPoliza() {
+      const rol = $('#urol').value;
+      const select = $('#utipopoliza');
+      const help = $('#helpTipo');
+      const esCliente = (rol === 'cliente');
+
+      select.disabled = !esCliente;
+      select.classList.toggle('is-disabled', !esCliente);
+      help.textContent = esCliente ? '' : 'Solo disponible para clientes.';
+    }
+
+    function abrirNuevoUsuario() {
+      $('#tituloUsuario').textContent = 'Nuevo Usuario';
+      $('#userIndex').value = '';
+      $('#uname').value = '';
+      $('#uemail').value = '';
+      $('#urol').value = 'cliente';
+      $('#utipopoliza').value = 'Auto';
+      $('#upass').value = '';
+      toggleTipoPoliza(); // aplica estado inicial
+    }
+
+    window.editarUsuario = (i) => {
+      const u = usuarios[i];
+      if (!u) return;
+      $('#tituloUsuario').textContent = 'Editar Usuario';
+      $('#userIndex').value = i;
+      $('#uname').value = u.nombre;
+      $('#uemail').value = u.email;
+      $('#urol').value = u.rol;
+      $('#utipopoliza').value = u.tipopoliza || 'Auto';
+      $('#upass').value = u.password || '';
+      toggleTipoPoliza(); // se ajusta automáticamente
+      new bootstrap.Modal('#modalUsuario').show();
+    };
+
+    // Reacciona si el usuario cambia el rol dentro del modal
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'urol') toggleTipoPoliza();
+    });
+
+    window.eliminarUsuario = (i) => {
+      if (usuarios[i].email === 'admin@demo.com') return alert('No se puede eliminar el administrador principal.');
+      if (!confirm('¿Eliminar usuario?')) return;
+      usuarios.splice(i, 1);
+      renderUsuarios($('#buscarUsuario').value.toLowerCase());
+      showAlert("❌ Usuario eliminado correctamente", "danger");
+    };
+
+    $('#guardarUsuario').addEventListener('click', () => {
+      const i = $('#userIndex').value;
+      const data = {
+        nombre: $('#uname').value.trim(),
+        email: $('#uemail').value.trim(),
+        rol: $('#urol').value,
+        password: $('#upass').value.trim(),
+        tipopoliza: $('#utipopoliza').value
+      };
+
+      if (!data.nombre || !data.email || !data.rol || !data.password) return alert("Todos los campos son obligatorios.");
+      if (data.password.length < 8) return alert("La contraseña debe tener al menos 8 caracteres.");
+
+      if (i === '') usuarios.push(data);
+      else usuarios[i] = data;
+      saveUsuarios();
+
+      if (data.rol === 'cliente') {
+        const index = polizas.findIndex(p =>
+          p.cliente.toLowerCase() === data.nombre.toLowerCase() ||
+          p.cliente.toLowerCase() === data.email.toLowerCase()
+        );
+        if (index >= 0) {
+          polizas[index].tipo = data.tipopoliza;
+        } else {
+          const nuevaPoliza = {
+            numero: generarNumero(),
+            cliente: data.nombre,
+            tipo: data.tipopoliza,
+            vencimiento: (() => {
+              const d = new Date();
+              d.setFullYear(d.getFullYear() + 1);
+              return d.toISOString().split('T')[0];
+            })()
+          };
+          polizas.push(nuevaPoliza);
+        }
+        savePolizas();
+      }
+
+      renderUsuarios($('#buscarUsuario').value.toLowerCase());
+      renderPolizas();
+      showAlert("✅ Cambios guardados correctamente");
+      document.querySelector('#modalUsuario .btn-close').click();
+    });
+
+    // ======= BUSCADORES =======
+    $('#buscarPoliza').addEventListener('input', e => renderPolizas(e.target.value.toLowerCase()));
+    $('#buscarUsuario').addEventListener('input', e => renderUsuarios(e.target.value.toLowerCase()));
+
+    // ======= INICIALIZACIÓN =======
+    renderUsuarios();
+    renderPolizas();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+ 

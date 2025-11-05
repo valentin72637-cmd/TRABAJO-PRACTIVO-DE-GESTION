@@ -7,6 +7,7 @@ function redirect_with_error($code) {
     exit;
 }
 
+// Validar campos
 if (empty($_POST['email']) || empty($_POST['password'])) {
     redirect_with_error('required');
 }
@@ -29,16 +30,21 @@ if ($row = $result->fetch_assoc()) {
         $_SESSION['user_email'] = $row['email'];
         $_SESSION['user_role'] = $row['rol'];
 
-        // Redirección por rol
-        if ($row['rol'] === 'admin') {
-            header('Location: ./dashboard_admin.php');
-        } else {
-            header('Location: ./dashboard_cliente.php');
-        }
+        // Guardar también en localStorage (modo Go Live sin backend persistente)
+        echo "<script>
+            localStorage.setItem('usuario_actual', JSON.stringify({
+                nombre: '{$row['nombre']}',
+                email: '{$row['email']}',
+                rol: '{$row['rol']}'
+            }));
+            window.location.href = '" . ($row['rol'] === 'admin'
+                ? "../login/app/dashboard_admin.html"
+                : "../login/app/dashboard_cliente.html") . "';
+        </script>";
         exit;
     }
 }
 
-// Falla
+// Si el login falla
 redirect_with_error('invalid');
 ?>

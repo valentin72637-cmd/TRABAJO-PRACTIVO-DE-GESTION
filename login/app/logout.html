@@ -1,7 +1,71 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><title>Salir</title></head>
-<body><p>Saliendo...</p>
-<script src="./logout.js"></script>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Saliendo... | SegurAR</title>
+
+  <!-- Bootstrap y estilos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0056b3, #007bff);
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .icon {
+      font-size: 4rem;
+      animation: fadeOut 2.5s infinite ease-in-out;
+    }
+
+    @keyframes fadeOut {
+      0%, 100% { opacity: 1; transform: translateY(0); }
+      50% { opacity: 0.4; transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-weight: 700;
+      margin-top: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #e3f2fd;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <i class="bi bi-box-arrow-right icon"></i>
+    <h1>Cerrando sesión...</h1>
+    <p>Serás redirigido al inicio de sesión en unos segundos.</p>
+  </div>
+
+  <footer>© 2025 SegurAR — Proyecto Académico U.T.N. F.R.T.</footer>
+
+  <script src="./common.js"></script>
+  <script src="./logout.js"></script>
+  
 </body>
 </html>

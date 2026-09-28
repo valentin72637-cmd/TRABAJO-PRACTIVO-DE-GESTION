@@ -1,3 +1,24 @@
-body { background: #f5f7fb; }
-.card { border-radius: 1rem; }
-.btn { border-radius: .75rem; }
+/* Fondo del login */
+body {
+  background-image: url('./app/assets/fondos/fondoLogin.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Corrección de estilos */
+.card {
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(6px);
+}
+
+.btn {
+  border-radius: 0.75rem;
+}
+
+/* Quita el fondo sólido anterior */
+body[style] {
+  background: none !important;
+}

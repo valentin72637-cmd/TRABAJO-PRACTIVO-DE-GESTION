@@ -1,127 +1,221 @@
-<!-- login/app/dashboard_cliente.html -->
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Panel Cliente - Gestión de Seguros</title>
+  <title>Panel Cliente - SegurAR</title>
+
+  <!-- Bootstrap y fuentes -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="../../backend/Header/header.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      transition: background-image 1.5s ease-in-out;
+      min-height: 100vh;
+    }
+
+    .overlay {
+      background-color: rgba(255, 255, 255, var(--overlay-opacity, 0.9));
+      min-height: 100vh;
+      transition: background-color 0.5s ease;
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, #0056b3, #007bff);
+    }
+
+    .navbar a {
+      color: white !important;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .navbar a:hover {
+      color: #dbeafe !important;
+    }
+
+    .card {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h4 {
+      color: #0d6efd;
+      font-weight: 700;
+    }
+
+    .mensaje-poliza {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #0056b3;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      background: #0d6efd;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      margin-top: 40px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    /* === Control de transparencia === */
+    .opacidad-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .opacidad-control label {
+      font-size: 0.85rem;
+      color: #333;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .opacidad-control input[type=range] {
+      width: 100px;
+    }
+
+    .opacidad-control button {
+      background: #0d6efd;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      padding: 5px 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .opacidad-control button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 
-<body class="bg-light">
-
-  <!-- ======= HEADER ======= -->
-  <header class="main-header">
-    <nav class="navbar container d-flex justify-content-between align-items-center py-3">
-      <a class="navbar-brand" href="../index.html">SegurAR</a>
-      <ul class="nav list-unstyled d-flex gap-3 m-0">
-        <li><a id="linkInicio" href="#">Inicio</a></li>
-        <li><a href="./logout.html" class="text-danger">Cerrar sesión</a></li>
-      </ul>
+<body>
+  <div class="overlay" id="overlay">
+    <!-- NAV -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="../index.html"><i class="bi bi-shield-check"></i> SegurAR</a>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navCliente">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navCliente">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house"></i> Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="./informes_cliente.html"><i class="bi bi-bar-chart"></i> Mis informes</a></li>
+            <li class="nav-item"><a class="nav-link text-warning" href="./logout.html"><i
+                  class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </div>
     </nav>
-  </header>
 
-  <!-- ======= CONTENIDO PRINCIPAL ======= -->
-  <main class="container py-4">
-    <!-- Mensaje de bienvenida -->
-    <div class="alert alert-success">
-      Accediste como <strong>cliente</strong>. Bienvenido, <span id="nombreCliente"></span>.
-    </div>
+    <!-- MAIN -->
+    <main class="container py-5">
+      <div class="alert alert-success shadow-sm">
+        <i class="bi bi-person-circle"></i>
+        Accediste como <strong>cliente</strong>.
+        Bienvenido, <span id="clienteNombre"></span>.
+      </div>
 
-    <!-- Tarjeta con tabla de pólizas -->
-    <div class="card">
-      <div class="card-body">
-        <h1 class="h4">Mis Pólizas</h1>
-        <p class="text-muted">Estas son las pólizas asignadas a tu cuenta.</p>
+      <!-- Texto dinámico -->
+      <div id="mensajeTipoPoliza" class="mensaje-poliza text-center mb-3"></div>
 
-        <!-- Tabla de pólizas del cliente -->
-        <table class="table table-striped mt-3" id="tablaPolizasCliente">
-          <thead class="table-dark">
-            <tr>
-              <th>#</th>
-              <th>N° Póliza</th>
-              <th>Tipo</th>
-              <th>Vencimiento</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <!-- Tarjeta de resumen -->
+      <div id="resumenPoliza" class="alert shadow-sm d-none"></div>
 
-        <!-- Mensaje dinámico opcional -->
-        <p id="mensajePoliza" class="mt-3 fw-semibold text-primary"></p>
+      <!-- Tabla de pólizas -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h4><i class="bi bi-file-earmark-text"></i> Mis Pólizas</h4>
+          <p class="text-muted mb-4">Estas son las pólizas asignadas a tu cuenta.</p>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tablaMisPolizas">
+              <thead class="table-primary">
+                <tr>
+                  <th>#</th>
+                  <th>N° Póliza</th>
+                  <th>Tipo</th>
+                  <th>Inicio</th>
+                  <th>Vencimiento</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="text-end mt-3">
+            <button class="btn btn-outline-primary" id="btnAsesor">
+              <i class="bi bi-envelope"></i> Contactar asesor
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL: CONTACTAR ASESOR -->
+    <div class="modal fade" id="modalAsesores" tabindex="-1" aria-labelledby="modalAsesoresLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-people"></i> Contactar Asesor</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted">Podés contactar a cualquiera de los asesores disponibles:</p>
+            <div id="listaAsesores" class="list-group"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
       </div>
     </div>
-  </main>
 
-  <!-- ======= SCRIPT PRINCIPAL ======= -->
-  <script>
-    // ============================
-    // 1️⃣ Verifica sesión activa
-    // ============================
-    const user = JSON.parse(localStorage.getItem('usuario_actual') || 'null');
-    const tbody = document.querySelector('#tablaPolizasCliente tbody');
-    const mensaje = document.getElementById('mensajePoliza');
+    <!-- FOOTER -->
+    <footer>
+      © 2025 Sistema de Gestión de Seguros - Proyecto Académico U.T.N. F.R.T.
+    </footer>
+  </div>
 
-    // Si no hay usuario logueado → redirigir al login
-    if (!user) {
-      window.location.href = '../index.html?error=session';
-    } else {
-      document.getElementById('nombreCliente').textContent = user.nombre || '';
-    }
+  <!-- CONTROL DE OPACIDAD -->
+  <div class="opacidad-control">
+    <label for="sliderOpacidad"><i class="bi bi-brightness-high"></i></label>
+    <input type="range" id="sliderOpacidad" min="0.3" max="1" step="0.05" value="0.9">
+    <button type="button" id="btnResetOpacidad" title="Restablecer">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+  </div>
 
-    // ============================
-    // 2️⃣ Función para renderizar pólizas
-    // ============================
-    function renderPolizasCliente() {
-      const polizas = JSON.parse(localStorage.getItem('polizas') || '[]');
-      // Filtra las pólizas por nombre o email del cliente logueado
-      const mias = polizas.filter(p =>
-        (p.cliente || '').toLowerCase() === (user.nombre || '').toLowerCase() ||
-        (p.cliente || '').toLowerCase() === (user.email || '').toLowerCase()
-      );
-
-      // Limpia la tabla
-      tbody.innerHTML = '';
-
-      if (!mias.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No tenés pólizas registradas.</td></tr>`;
-        mensaje.textContent = ''; // Limpia mensaje dinámico
-      } else {
-        // Crea una fila por cada póliza
-        mias.forEach((p, i) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${p.numero}</td>
-            <td>${p.tipo}</td>
-            <td>${p.vencimiento}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        // Muestra mensaje dinámico (solo si tiene una póliza principal)
-        const ultima = mias[mias.length - 1];
-        mensaje.textContent = `Tu póliza actual es de tipo "${ultima.tipo}" y vence el ${ultima.vencimiento}.`;
-      }
-    }
-
-    // ============================
-    // 3️⃣ Sincroniza cambios en tiempo real
-    // ============================
-    // Escucha cambios en localStorage (por ejemplo, si el admin edita pólizas)
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'polizas') {
-        renderPolizasCliente(); // Vuelve a renderizar cuando cambian las pólizas
-      }
-    });
-
-    // ============================
-    // 4️⃣ Inicializa al cargar
-    // ============================
-    renderPolizasCliente();
-  </script>
-
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="common.js"></script>
+  <script src="guard.js"></script>
+  <script src="dashboard_cliente.js"></script>
 </body>
+
 </html>
